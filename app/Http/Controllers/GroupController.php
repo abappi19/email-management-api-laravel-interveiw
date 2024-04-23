@@ -58,13 +58,55 @@ class GroupController extends Controller
         }
     }
 
+    
+
     function addEmails(Request $request, $groupId)
     {
-        $group = Group::findOrFail($groupId);
-        $emailIds = $request->input('email_ids');
+        try {
+            $group = Group::findOrFail($groupId);
+            $validatedData = $request->validate([
+                'email_ids' => 'required|array',
+                'email_ids.*' => 'numeric'
+            ]);
 
-        $group->emails()->attach($emailIds);
+            $group->emails()->attach($validatedData['email_ids']);
+            return $this->success("Emails attached to group successfully", 200);
+        } catch (Exception $e) {
+            // Validation failed, return custom response
+            return $this->error('Emails or Group not found', 404);
+        }
+    }
+    public function removeEmails(Request $request, $groupId)
+    {
 
-        return response()->json(['message' => 'Emails attached to group successfully'], 200);
+        try {
+            $group = Group::findOrFail($groupId);
+            $validatedData = $request->validate([
+                'email_ids' => 'required|array',
+                'email_ids.*' => 'numeric'
+            ]);
+
+
+            $group->emails()->detach($validatedData['email_ids']);
+
+            return response()->json(['message' => 'Emails detached from group successfully'], 200);
+        } catch (ValidationException $e) {
+            // Validation failed, return custom response
+            return $this->error('Validation failed: ' . $e->getMessage(), 422);
+        }
+    }
+
+    public function getEmails(Request $request, $groupId)
+    {
+
+        try {
+            $group = Group::findOrFail($groupId);
+            $mails = $group->emails()->get();
+
+            return $this->success($mails, 200);
+        } catch (ValidationException $e) {
+            // group not found
+            return $this->error('Group not found', 404);
+        }
     }
 }

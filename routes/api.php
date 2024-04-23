@@ -9,26 +9,28 @@ use Illuminate\Support\Facades\Route;
 Route::any('/', [TestController::class, 'test']);
 
 
-Route::controller(EmailController::class)->group(function(){
+Route::post('/send-mail', [EmailController::class, 'sendMail']);
+
+Route::controller(EmailController::class)->prefix('emails')->group(function () {
     //upsert for both update and insert
-    Route::post('/emails', 'upsert');
+    Route::post('/', 'upsert');
     //get specific email
-    Route::post('/emails/{id}', 'get');
+    Route::post('/{id}', 'get');
     //delete specific email
-    Route::post('/emails/delete/{id}', 'delete');
+    Route::post('/delete/{id}', 'delete');
 });
 
 
-Route::controller(GroupController::class)->group(function(){
+Route::controller(GroupController::class)->prefix('groups')->group(function () {
     //upsert for both update and insert
-    Route::post('/groups', 'upsert');
+    Route::post('/', 'upsert');
     //get specific group
-    Route::post('/groups/{id}', 'get');
+    Route::post('/{id}', 'get');
     //delte specific group
-    Route::post('/groups/delete/{id}', 'delete');
+    Route::post('/delete/{id}', 'delete');
+
     //add specific emails to specific group
-    Route::post('/groups/{id}/add', 'addEmails');
+    Route::post('/{id}/add', 'addEmails');
+    Route::post('/{id}/remove', 'removeEmails');
+    Route::post('/{id}/get', 'getEmails');
 });
-
-
-
